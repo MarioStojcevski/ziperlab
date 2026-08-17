@@ -1,65 +1,60 @@
 # ZiperLab Media Stack
 
-Self-hosted photo and music library. Immich for photos (auto backup, face recognition, semantic search, albums) and Navidrome for music (Subsonic API compatible, works with streaming apps). All processing local, nothing leaves the server.
+Your own private Google Photos and Spotify — but you own it. Everything runs on a home server, nothing gets uploaded to anyone else's cloud.
 
-## Architecture
+**For photos:** [Immich](https://immich.app) — auto-backup from your phone, face recognition, search by what's in the photo, albums, the works. There's a mobile app that feels just like Google Photos.
+
+**For music:** [Navidrome](https://www.navidrome.org) — points at a folder of your music files and serves them up with proper metadata, album art, and streaming. Works with a bunch of phone apps.
+
+Both are accessible at `cloud.ziperlab.com` — no VPN, no port forwarding, just a URL that works from anywhere.
+
+## How it fits together
 
 ```
-                    ┌─────────────────────┐
-                    │   Cloudflare DNS    │
-                    │ cloud.ziperlab.com  │
-                    └─────────┬───────────┘
-                              │ HTTPS (auto)
-                    ┌─────────▼───────────┐
-                    │     cloudflared      │
-                    │   (Tunnel daemon)    │
-                    └─────────┬───────────┘
-                              │
-                    ┌─────────▼───────────┐
-                    │       Caddy         │
-                    │   Reverse Proxy     │
-                    │   :8080 (internal)  │
-                    └──┬──────────────┬───┘
-                       │              │
-              /photos  │              │  /music
-                       │              │
-              ┌────────▼──┐    ┌──────▼───────┐
-              │  Immich   │    │  Navidrome   │
-              │  Server   │    │              │
-              │  :2283    │    │  :4533       │
-              └─────┬─────┘    └──────────────┘
-                    │
-         ┌──────────┼──────────┐
-         │          │          │
-   ┌─────▼──┐ ┌────▼───┐ ┌───▼────┐
-   │ Redis  │ │ Postgres│ │  ML    │
-   │        │ │(pgvecto)│ │ Worker │
-   └────────┘ └────────┘ └────────┘
+        You (anywhere)
+            |
+            v
+   cloud.ziperlab.com  (Cloudflare handles HTTPS automatically)
+            |
+            v
+     cloudflared  (secure tunnel — no ports opened on your router)
+            |
+            v
+         Caddy  (traffic cop — sends /photos here, /music there)
+          /    \
+         v      v
+      Immich  Navidrome
 ```
 
-## Quick Start
+The whole thing runs in Docker. One command to start, one command to stop.
 
-1. Clone this repo on the server
-2. `cp .env.example .env` and generate a real `DB_PASSWORD` with `openssl rand -hex 24`
-3. `chmod +x scripts/init-volumes.sh && ./scripts/init-volumes.sh`
-4. `docker compose up -d`
-5. Wait for Immich server logs: `docker compose logs -f immich-server`
-6. Visit `https://cloud.ziperlab.com/photos` — create admin account
-7. Visit `https://cloud.ziperlab.com/music` — Navidrome auto-creates first-run admin
-8. Apply HUD theme: Immich admin > Settings > Custom Styling > paste `themes/immich-hud/custom.css`
+## What you need to get started
 
-See [docs/SETUP.md](docs/SETUP.md) for the full walkthrough, [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md) for tunnel setup.
+- A Linux server (even a modest one works)
+- Docker installed
+- A Cloudflare account (free tier is fine) with `ziperlab.com` pointing to it
+- Your music files dumped into a folder
 
-## Documentation
+The full setup steps are in [docs/SETUP.md](docs/SETUP.md) — it walks through everything from cloning the repo to seeing your photos in the browser.
 
-- [SETUP.md](docs/SETUP.md) — full installation guide
-- [CLOUDFLARE.md](docs/CLOUDFLARE.md) — Cloudflare Tunnel configuration
-- [USERS_AND_SHARING.md](docs/USERS_AND_SHARING.md) — multi-user accounts and library sharing
-- [MOBILE_APPS.md](docs/MOBILE_APPS.md) — phone app setup for both services
-- [BACKUP.md](docs/BACKUP.md) — backup strategy and scripts
+## What it looks like
 
-## Known Limitations
+Immich gets a custom retro-sci-fi HUD theme (deep space black, phosphor green accents, monospace chrome). It's applied through Immich's built-in custom CSS field — no rebuilding Docker images, just paste and save.
 
-**Navidrome sharing is effectively one shared library.** Navidrome supports multi-user accounts, but there is no per-user private library with selective sharing. Every user with an account sees the same music collection. Permissions can restrict admin actions, not library visibility. If true per-user music separation matters later, that requires a second Navidrome instance or a different tool.
+Navidrome ships with its default UI for now. Theming it properly means forking the source, which is a separate project.
 
-Immich does not have this limitation — it has full shared albums and partner sharing between accounts.
+## Guides
+
+| What | Where |
+|------|-------|
+| Full installation walkthrough | [docs/SETUP.md](docs/SETUP.md) |
+| Cloudflare tunnel setup (how to expose it to the internet) | [docs/CLOUDFLARE.md](docs/CLOUDFLARE.md) |
+| Adding users and sharing photos/music | [docs/USERS_AND_SHARING.md](docs/USERS_AND_SHARING.md) |
+| Phone app setup | [docs/MOBILE_APPS.md](docs/MOBILE_APPS.md) |
+| Backups — because this is self-hosted now | [docs/BACKUP.md](docs/BACKUP.md) |
+
+## One thing to know about music sharing
+
+Immich has real per-user libraries — you and your partner can each have your own photo collections and selectively share albums.
+
+Navidrome does **not** do this. Everyone who logs in sees the same music library. You can have separate logins, but there's no "your music vs. my music." It's one shared household collection. If you need per-user music separation later, that means running a second Navidrome instance — but for most households, one shared library is fine.
