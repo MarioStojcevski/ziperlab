@@ -62,6 +62,7 @@ Wait for `Immich Server is listening` in the logs, then `Ctrl+C`.
 
 - **Photos:** visit `https://cloud.ziperlab.com/photos` — create the first admin account
 - **Music:** visit `https://cloud.ziperlab.com/music` — Navidrome auto-creates its first admin on first visit
+- **Server dashboard:** visit `https://cloud.ziperlab.com/admin` — Glances shows live CPU, RAM, disk, network, and Docker stats
 
 ## Step 8 — Apply HUD theme
 
@@ -72,6 +73,7 @@ In Immich: **Administration > Settings > Custom Styling** — paste the full con
 - [ ] `docker compose ps` shows all services `Up`/healthy
 - [ ] `https://cloud.ziperlab.com/photos` loads Immich login over HTTPS
 - [ ] `https://cloud.ziperlab.com/music` loads Navidrome login over HTTPS
+- [ ] `https://cloud.ziperlab.com/admin` loads Glances server dashboard
 - [ ] HUD theme visibly applied on Immich
 - [ ] A second user can be created and tested on Immich
 

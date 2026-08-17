@@ -42,6 +42,19 @@ services:
       - ${NAVIDROME_MUSIC}:/music:ro
     restart: unless-stopped
 
+  glances:
+    image: nicolargo/glances:latest-full
+    pid: "host"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/os-release:/etc/os-release:ro
+      - /run/user:/run/user:ro
+    environment:
+      GLANCES_OPT: "-w --disable-webui"
+    ports:
+      - "61208:61208"
+    restart: unless-stopped
+
   caddy:
     image: caddy:2-alpine
     ports:
@@ -51,6 +64,7 @@ services:
     depends_on:
       - immich-server
       - navidrome
+      - glances
     restart: unless-stopped
 
   cloudflared:

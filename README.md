@@ -6,6 +6,8 @@ Your own private Google Photos and Spotify — but you own it. Everything runs o
 
 **For music:** [Navidrome](https://www.navidrome.org) — points at a folder of your music files and serves them up with proper metadata, album art, and streaming. Works with a bunch of phone apps.
 
+**For server monitoring:** [Glances](https://nicolargo.github.io/glances/) — a live dashboard showing CPU, RAM, disk space, network traffic, and everything Docker is running. So you know what's going on under the hood.
+
 Both are accessible at `cloud.ziperlab.com` — no VPN, no port forwarding, just a URL that works from anywhere.
 
 ## How it fits together
@@ -20,10 +22,11 @@ Both are accessible at `cloud.ziperlab.com` — no VPN, no port forwarding, just
      cloudflared  (secure tunnel — no ports opened on your router)
             |
             v
-         Caddy  (traffic cop — sends /photos here, /music there)
-          /    \
-         v      v
-      Immich  Navidrome
+         Caddy  (traffic cop — routes by path)
+        / | \
+       v  v  v
+    Immich Navidrome Glances
+    /photos /music  /admin
 ```
 
 The whole thing runs in Docker. One command to start, one command to stop.
@@ -52,6 +55,7 @@ Navidrome ships with its default UI for now. Theming it properly means forking t
 | Adding users and sharing photos/music | [docs/USERS_AND_SHARING.md](docs/USERS_AND_SHARING.md) |
 | Phone app setup | [docs/MOBILE_APPS.md](docs/MOBILE_APPS.md) |
 | Backups — because this is self-hosted now | [docs/BACKUP.md](docs/BACKUP.md) |
+| Server dashboard (CPU, RAM, disk, traffic) | `https://cloud.ziperlab.com/admin` |
 
 ## One thing to know about music sharing
 
