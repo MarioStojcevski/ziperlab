@@ -1,0 +1,621 @@
+/* ===================================================================
+   ZiperLab Media Stack — Immich HUD Theme
+   Retro strategic sci-fi command console aesthetic
+   
+   Apply via: Immich Admin → Settings → Custom Styling → paste contents
+   
+   Design tokens:
+     --hud-bg:         #05070A  (deep space black)
+     --hud-green:      #39FF88  (phosphor green primary)
+     --hud-amber:      #FFB000  (amber warning accent)
+     --hud-cyan:       #4DE8FF  (cold cyan secondary)
+     --hud-border:     #123322  (dim green hairline)
+     --hud-green-dim:  #0A1A12  (green tint dark)
+     --hud-green-glow: rgba(57, 255, 136, 0.15)  (glow halo)
+   =================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --hud-bg: #05070A;
+  --hud-bg-raised: #0A0E14;
+  --hud-bg-panel: #080C10;
+  --hud-green: #39FF88;
+  --hud-green-rgb: 57, 255, 136;
+  --hud-amber: #FFB000;
+  --hud-amber-rgb: 255, 176, 0;
+  --hud-cyan: #4DE8FF;
+  --hud-cyan-rgb: 77, 232, 255;
+  --hud-border: #123322;
+  --hud-border-bright: #1A4430;
+  --hud-green-dim: #0A1A12;
+  --hud-green-glow: rgba(57, 255, 136, 0.15);
+  --hud-cyan-glow: rgba(77, 232, 255, 0.12);
+  --hud-text: #C8D6C0;
+  --hud-text-dim: #5A6B54;
+  --hud-mono: 'Share Tech Mono', 'JetBrains Mono', 'Courier New', monospace;
+  --hud-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── Global Reset ──────────────────────────────────────────────── */
+
+body,
+#__next,
+.app {
+  background: var(--hud-bg) !important;
+  color: var(--hud-text) !important;
+  font-family: var(--hud-sans) !important;
+}
+
+::selection {
+  background: rgba(57, 255, 136, 0.3);
+  color: #fff;
+}
+
+/* ── Scanline Overlay ──────────────────────────────────────────── */
+/* Subtle CRT scanline effect across the entire viewport */
+
+#__next::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.04) 2px,
+    rgba(0, 0, 0, 0.04) 4px
+  );
+  mix-blend-mode: multiply;
+}
+
+/* ── Login / Auth Screen ───────────────────────────────────────── */
+
+.login-card,
+.auth-card,
+[class*="login"],
+[class*="auth"] {
+  background: var(--hud-bg-panel) !important;
+  border: 1px solid var(--hud-border) !important;
+  border-radius: 0 !important;
+  box-shadow:
+    0 0 30px rgba(57, 255, 136, 0.05),
+    inset 0 0 60px rgba(5, 7, 10, 0.8) !important;
+}
+
+/* CRT boot flicker on login — plays once, subtle */
+@keyframes hud-boot {
+  0%   { opacity: 0; transform: scaleY(0.98); }
+  5%   { opacity: 1; }
+  7%   { opacity: 0.6; }
+  9%   { opacity: 1; }
+  12%  { opacity: 0.85; }
+  15%  { opacity: 1; transform: scaleY(1); }
+  100% { opacity: 1; transform: scaleY(1); }
+}
+
+.login-card,
+.auth-card,
+[class*="login"],
+[class*="auth"] {
+  animation: hud-boot 0.8s ease-out 1;
+}
+
+/* ── Typography — Monospace Chrome ─────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6,
+[class*="heading"],
+[class*="title"],
+[class*="label"],
+.nav-link,
+.sidebar-link,
+[class*="tab"] {
+  font-family: var(--hud-mono) !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Timestamps and metadata — console readout feel */
+time,
+[class*="date"],
+[class*="time"],
+[class*="meta"],
+[class*="count"],
+.badge {
+  font-family: var(--hud-mono) !important;
+  font-size: 0.8em;
+  letter-spacing: 0.06em;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────── */
+
+.btn-primary,
+button[class*="primary"],
+button[type="submit"],
+.input-button {
+  background: transparent !important;
+  border: 1px solid var(--hud-green) !important;
+  color: var(--hud-green) !important;
+  font-family: var(--hud-mono) !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 0 !important;
+  transition: all 0.2s ease !important;
+  position: relative;
+}
+
+.btn-primary:hover,
+button[class*="primary"]:hover,
+button[type="submit"]:hover,
+.input-button:hover {
+  background: rgba(57, 255, 136, 0.1) !important;
+  box-shadow: 0 0 20px rgba(57, 255, 136, 0.2),
+              inset 0 0 20px rgba(57, 255, 136, 0.05) !important;
+  text-shadow: 0 0 8px rgba(57, 255, 136, 0.5);
+}
+
+.btn-danger,
+button[class*="danger"],
+button[class*="delete"] {
+  border-color: var(--hud-amber) !important;
+  color: var(--hud-amber) !important;
+}
+
+.btn-danger:hover,
+button[class*="danger"]:hover,
+button[class*="delete"]:hover {
+  background: rgba(255, 176, 0, 0.1) !important;
+  box-shadow: 0 0 20px rgba(255, 176, 0, 0.2) !important;
+}
+
+.btn-secondary,
+button[class*="secondary"] {
+  background: transparent !important;
+  border: 1px solid var(--hud-border-bright) !important;
+  color: var(--hud-text-dim) !important;
+  font-family: var(--hud-mono) !important;
+  border-radius: 0 !important;
+}
+
+.btn-secondary:hover {
+  border-color: var(--hud-cyan) !important;
+  color: var(--hud-cyan) !important;
+}
+
+/* ── Inputs ────────────────────────────────────────────────────── */
+
+input,
+textarea,
+select {
+  background: var(--hud-bg) !important;
+  border: 1px solid var(--hud-border) !important;
+  color: var(--hud-text) !important;
+  font-family: var(--hud-mono) !important;
+  border-radius: 0 !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--hud-green) !important;
+  box-shadow: 0 0 12px rgba(57, 255, 136, 0.15) !important;
+  outline: none !important;
+}
+
+/* ── Navigation / Sidebar ──────────────────────────────────────── */
+
+nav,
+[class*="sidebar"],
+[class*="navigation"],
+.side-bar {
+  background: var(--hud-bg-panel) !important;
+  border-right: 1px solid var(--hud-border) !important;
+}
+
+.nav-link,
+.sidebar-link,
+[class*="nav-item"] {
+  color: var(--hud-text-dim) !important;
+  font-family: var(--hud-mono) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.85em;
+  transition: color 0.2s ease, background 0.2s ease !important;
+  border-left: 2px solid transparent !important;
+}
+
+.nav-link:hover,
+.sidebar-link:hover,
+[class*="nav-item"]:hover {
+  color: var(--hud-green) !important;
+  background: rgba(57, 255, 136, 0.05) !important;
+}
+
+.nav-link.active,
+.sidebar-link.active,
+[class*="nav-item"][class*="active"],
+[class*="nav-item"].selected {
+  color: var(--hud-green) !important;
+  border-left-color: var(--hud-green) !important;
+  background: rgba(57, 255, 136, 0.08) !important;
+  text-shadow: 0 0 6px rgba(57, 255, 136, 0.3);
+}
+
+/* ── Status Bar (top strip) ────────────────────────────────────── */
+/* Immich's top bar gets HUD treatment */
+
+header,
+[class*="top-bar"],
+[class*="status-bar"],
+[class*="header"] {
+  background: var(--hud-bg-panel) !important;
+  border-bottom: 1px solid var(--hud-border) !important;
+  font-family: var(--hud-mono) !important;
+  letter-spacing: 0.04em;
+}
+
+/* ── Cards — Bracket Corners ───────────────────────────────────── */
+/* Replace rounded rectangles with sharp bracket-corner cards */
+
+.photo-card,
+[class*="card"],
+.asset-card,
+.memory-card,
+.album-card,
+.shared-card {
+  background: var(--hud-bg-raised) !important;
+  border: 1px solid var(--hud-border) !important;
+  border-radius: 0 !important;
+  position: relative;
+  overflow: visible !important;
+}
+
+/* Bracket corner pseudo-elements */
+.photo-card::before,
+.photo-card::after,
+[class*="card"]::before,
+[class*="card"]::after,
+.asset-card::before,
+.asset-card::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--hud-green);
+  border-style: solid;
+  border-width: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.photo-card::before,
+[class*="card"]::before,
+.asset-card::before {
+  top: -1px;
+  left: -1px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+
+.photo-card::after,
+[class*="card"]::after,
+.asset-card::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+.photo-card:hover::before,
+.photo-card:hover::after,
+[class*="card"]:hover::before,
+[class*="card"]:hover::after,
+.asset-card:hover::before,
+.asset-card:hover::after {
+  opacity: 1;
+  border-color: var(--hud-cyan);
+}
+
+.photo-card:hover,
+[class*="card"]:hover,
+.asset-card:hover {
+  border-color: var(--hud-border-bright) !important;
+  box-shadow: 0 0 20px rgba(77, 232, 255, 0.08) !important;
+}
+
+/* ── Thumbnails / Image Containers ─────────────────────────────── */
+
+img,
+[class*="thumbnail"],
+[class*="image-container"],
+.photo-view {
+  border-radius: 0 !important;
+}
+
+/* Subtle green tint overlay on hover for photos */
+.photo-card:hover img,
+.asset-card:hover img {
+  filter: brightness(1.05) saturate(1.1);
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--hud-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--hud-border-bright);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--hud-green);
+  box-shadow: 0 0 6px rgba(57, 255, 136, 0.3);
+}
+
+/* ── Dropdowns / Menus ─────────────────────────────────────────── */
+
+[class*="dropdown"],
+[class*="menu"],
+[class*="context-menu"],
+[class*="popover"] {
+  background: var(--hud-bg-panel) !important;
+  border: 1px solid var(--hud-border) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6) !important;
+}
+
+[class*="dropdown"] a,
+[class*="menu"] a,
+[class*="context-menu"] button {
+  color: var(--hud-text-dim) !important;
+  font-family: var(--hud-mono) !important;
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+[class*="dropdown"] a:hover,
+[class*="menu"] a:hover,
+[class*="context-menu"] button:hover {
+  color: var(--hud-green) !important;
+  background: rgba(57, 255, 136, 0.08) !important;
+}
+
+/* ── Modal / Dialog ────────────────────────────────────────────── */
+
+[class*="modal"],
+[class*="dialog"],
+[role="dialog"] {
+  background: var(--hud-bg-panel) !important;
+  border: 1px solid var(--hud-border) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.8),
+              0 0 30px rgba(57, 255, 136, 0.05) !important;
+}
+
+[class*="modal"] .modal-title,
+[role="dialog"] h2,
+[role="dialog"] h3 {
+  color: var(--hud-green) !important;
+}
+
+/* ── Tables ────────────────────────────────────────────────────── */
+
+table {
+  border-collapse: collapse;
+}
+
+th {
+  background: var(--hud-bg) !important;
+  border-bottom: 1px solid var(--hud-green) !important;
+  color: var(--hud-green) !important;
+  font-family: var(--hud-mono) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8em;
+}
+
+td {
+  border-bottom: 1px solid var(--hud-border) !important;
+  font-family: var(--hud-mono) !important;
+  font-size: 0.85em;
+}
+
+tr:hover td {
+  background: rgba(57, 255, 136, 0.03) !important;
+}
+
+/* ── Tags / Badges / Pills ─────────────────────────────────────── */
+
+.tag,
+.badge,
+[class*="tag"],
+[class*="badge"],
+[class*="chip"],
+[class*="pill"] {
+  background: rgba(57, 255, 136, 0.08) !important;
+  border: 1px solid var(--hud-border) !important;
+  color: var(--hud-green) !important;
+  font-family: var(--hud-mono) !important;
+  font-size: 0.75em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 0 !important;
+}
+
+/* ── Progress / Loading ────────────────────────────────────────── */
+
+[class*="progress"],
+[class*="loading"],
+[class*="spinner"] {
+  color: var(--hud-green) !important;
+}
+
+@keyframes hud-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+[class*="spinner"]::after,
+[class*="loading"]::after {
+  animation: hud-pulse 1.5s ease-in-out infinite;
+  color: var(--hud-green);
+}
+
+/* ── Toast / Notification ──────────────────────────────────────── */
+
+[class*="toast"],
+[class*="notification"],
+[class*="snackbar"],
+[class*="alert"] {
+  background: var(--hud-bg-panel) !important;
+  border: 1px solid var(--hud-border) !important;
+  border-radius: 0 !important;
+  color: var(--hud-text) !important;
+  font-family: var(--hud-mono) !important;
+}
+
+[class*="alert"][class*="warning"],
+[class*="toast"][class*="warning"] {
+  border-color: var(--hud-amber) !important;
+}
+
+[class*="alert"][class*="success"],
+[class*="toast"][class*="success"] {
+  border-color: var(--hud-green) !important;
+}
+
+/* ── Links ─────────────────────────────────────────────────────── */
+
+a {
+  color: var(--hud-cyan) !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease, text-shadow 0.2s ease !important;
+}
+
+a:hover {
+  color: var(--hud-green) !important;
+  text-shadow: 0 0 8px rgba(57, 255, 136, 0.4);
+}
+
+/* ── Settings / Admin Panels ───────────────────────────────────── */
+
+[class*="settings"],
+[class*="admin"],
+[class*="config"],
+[class*="section"] {
+  background: transparent !important;
+}
+
+[class*="section-title"],
+[class*="settings-title"] {
+  color: var(--hud-green) !important;
+  font-family: var(--hud-mono) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--hud-border) !important;
+  padding-bottom: 8px;
+}
+
+/* ── Toggle / Switch ───────────────────────────────────────────── */
+
+[class*="toggle"],
+[class*="switch"] {
+  border-color: var(--hud-border) !important;
+}
+
+[class*="toggle"][class*="active"],
+[class*="switch"][class*="active"],
+input[type="checkbox"]:checked {
+  accent-color: var(--hud-green) !important;
+}
+
+/* ── Search ────────────────────────────────────────────────────── */
+
+[class*="search"],
+input[type="search"] {
+  background: var(--hud-bg) !important;
+  border: 1px solid var(--hud-border) !important;
+  border-radius: 0 !important;
+  font-family: var(--hud-mono) !important;
+}
+
+[class*="search"]:focus-within,
+input[type="search"]:focus {
+  border-color: var(--hud-green) !important;
+  box-shadow: 0 0 15px rgba(57, 255, 136, 0.1) !important;
+}
+
+/* ── Timeline / Photo Grid ─────────────────────────────────────── */
+
+[class*="timeline"],
+.photo-grid,
+[class*="grid"] {
+  gap: 2px !important;
+}
+
+/* Date separators in timeline */
+[class*="date-separator"],
+[class*="timeline-group"] > *:first-child {
+  font-family: var(--hud-mono) !important;
+  color: var(--hud-amber) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ── Empty States ──────────────────────────────────────────────── */
+
+[class*="empty"],
+[class*="no-result"],
+[class*="placeholder"] {
+  color: var(--hud-text-dim) !important;
+  font-family: var(--hud-mono) !important;
+  letter-spacing: 0.04em;
+}
+
+/* ── Tooltip ───────────────────────────────────────────────────── */
+
+[class*="tooltip"] {
+  background: var(--hud-bg-panel) !important;
+  border: 1px solid var(--hud-green) !important;
+  color: var(--hud-green) !important;
+  font-family: var(--hud-mono) !important;
+  font-size: 0.75em;
+  border-radius: 0 !important;
+  box-shadow: 0 0 12px rgba(57, 255, 136, 0.2) !important;
+}
+
+/* ── Hover Glow — Interactive Elements ─────────────────────────── */
+/* Restraint: only on explicitly interactive targets, not everything */
+
+button:not([disabled]):hover,
+[class*="clickable"]:hover,
+[class*="interactive"]:hover {
+  transition: box-shadow 0.3s ease;
+}
+
+/* ── Print Styles — strip HUD effects ──────────────────────────── */
+
+@media print {
+  :root {
+    --hud-bg: #fff;
+    --hud-text: #000;
+    --hud-green: #006633;
+  }
+  
+  #__next::after {
+    display: none;
+  }
+}
