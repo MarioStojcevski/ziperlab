@@ -1,17 +1,11 @@
-:8080 {
-	handle_path /photos* {
-		reverse_proxy immich-server:2283
-	}
+photos.ziperlab.com {
+	reverse_proxy immich-server:2283
+}
 
-	handle_path /music* {
-		reverse_proxy navidrome:4533
-	}
+music.ziperlab.com {
+	reverse_proxy navidrome:4533
+}
 
-	handle_path /admin* {
-		reverse_proxy glances:61208
-	}
-
-	handle / {
-		redir /photos permanent
-	}
+admin.ziperlab.com {
+	reverse_proxy glances:61208
 }

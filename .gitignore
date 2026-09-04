@@ -1,6 +1,9 @@
 # Secrets
 .env
 
+# Local volume data
+data/
+
 # OS
 .DS_Store
 Thumbs.db

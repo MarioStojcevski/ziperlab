@@ -2,6 +2,10 @@ tunnel: <TUNNEL_ID>
 credentials-file: /etc/cloudflared/<TUNNEL_ID>.json
 
 ingress:
-  - hostname: cloud.ziperlab.com
+  - hostname: photos.ziperlab.com
+    service: http://caddy:8080
+  - hostname: music.ziperlab.com
+    service: http://caddy:8080
+  - hostname: admin.ziperlab.com
     service: http://caddy:8080
   - service: http_status:404

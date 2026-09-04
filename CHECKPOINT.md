@@ -1,10 +1,12 @@
 # CHECKPOINT — ZiperLab Media Stack
 
-Last updated: 2026-08-18
+Last updated: 2026-09-04
 
 ## What this repo is
 
-Self-hosted media stack: Immich (photos), Navidrome (music), Glances (server dashboard), all behind Caddy reverse proxy + Cloudflare Tunnel at `cloud.ziperlab.com`. Everything runs in Docker on a home Ubuntu/Debian server.
+Self-hosted media stack: Immich (photos), Navidrome (music), Glances (server dashboard), all behind Caddy reverse proxy + Cloudflare Tunnel. Each service gets its own subdomain in production. Everything runs in Docker on a home Ubuntu/Debian server.
+
+**Important:** Immich does NOT support sub-path routing. Each service must be served at the root of its own domain/port.
 
 ## What's built (local, not deployed)
 
@@ -14,8 +16,8 @@ All files are scaffolded locally at `C:\Users\mario\projects\ziperlab\`:
 ├── .env.example              # all env vars, needs real .env on server
 ├── .gitignore                # secrets + editor junk excluded
 ├── docker-compose.yml        # 8 services: Immich (4), Navidrome, Glances, Caddy, cloudflared
-├── caddy/Caddyfile           # /photos → Immich, /music → Navidrome, /admin → Glances
-├── cloudflared/config.yml.example  # tunnel ingress template
+├── caddy/Caddyfile           # subdomain routing: photos/music/admin → each service
+├── cloudflared/config.yml.example  # tunnel ingress template (subdomains)
 ├── scripts/
 │   ├── init-volumes.sh       # creates /srv/ziperlab/* host dirs
 │   └── backup.sh             # nightly cron: rsync + pg_dump
@@ -31,28 +33,24 @@ All files are scaffolded locally at `C:\Users\mario\projects\ziperlab\`:
 └── README.md                 # friendly overview + architecture diagram
 ```
 
-## Git status
-
-Repo is initialized on `main`. 15 files staged from initial scaffold + 4 modified files from Glances addition. **Nothing committed yet** — git identity needs to be configured first:
-
-```bash
-git config user.email "your@email.com"
-git config user.name "Your Name"
-git commit -m "feat: scaffold ziperlab media stack with Immich, Navidrome, Glances"
-```
-
 ## Services (what runs)
 
-| Service | URL path | Port | What it does |
-|---------|----------|------|-------------|
-| Immich Server | `/photos` | 2283 (internal) | Photo/video library, face recognition, search |
-| Immich ML | — | internal | Machine learning worker (face detect, etc.) |
-| Immich Redis | — | internal | Cache layer |
-| Immich Postgres | — | internal | Database (pgvecto-rs for vector search) |
-| Navidrome | `/music` | 4533 (internal) | Music streaming, Subsonic API |
-| Glances | `/admin` | 61208 (internal) | Server monitoring dashboard |
-| Caddy | — | 8080 (host) | Reverse proxy, routes all traffic |
-| cloudflared | — | none | Tunnel to Cloudflare |
+| Service | Local URL | Production URL | Port (host) | What it does |
+|---------|-----------|----------------|-------------|-------------|
+| Immich Server | localhost:2283 | photos.ziperlab.com | 2283 | Photo/video library, face recognition, search |
+| Immich ML | — | — | internal | Machine learning worker (face detect, etc.) |
+| Immich Redis | — | — | internal | Cache layer |
+| Immich Postgres | — | — | internal | Database (VectorChord for vector search) |
+| Navidrome | localhost:4533 | music.ziperlab.com | 4533 | Music streaming, Subsonic API |
+| Glances | localhost:61208 | admin.ziperlab.com | 61208 | Server monitoring dashboard |
+| Caddy | — | — | 8080 (internal) | Reverse proxy, subdomain routing (production) |
+| cloudflared | — | — | none | Tunnel to Cloudflare (production) |
+
+## Bugs fixed during local testing
+
+1. **Missing DB/Redis env vars** — immich-server had no DB_HOSTNAME/REDIS_HOSTNAME, defaulted to nonexistent `database` host.
+2. **Incompatible postgres image** — `pgvecto-rs:pg14-v0.2.0` doesn't work with Immich v3.1.0. Swapped to `ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0`.
+3. **Immich sub-path routing** — Immich does NOT support being served on a sub-path (e.g. `/photos`). Switched to port-based routing for local dev, subdomain-based for production.
 
 ## What needs to happen next (deployment)
 
@@ -91,21 +89,23 @@ Drop music files into `/srv/ziperlab/navidrome/music`. Any folder structure work
 Full steps in `docs/CLOUDFLARE.md`. Summary:
 1. Zero Trust dashboard → Networks → Tunnels → Create tunnel (name: `ziperlab-media`)
 2. Copy generated token
-3. Add public hostname: `cloud.ziperlab.com` → `http://caddy:8080`
+3. Add public hostnames (each service gets its own subdomain):
+   - `photos.ziperlab.com` → `http://caddy:8080`
+   - `music.ziperlab.com` → `http://caddy:8080`
+   - `admin.ziperlab.com` → `http://caddy:8080`
 4. Download credentials JSON, place at `cloudflared/<TUNNEL_ID>.json`
 5. Fill in `cloudflared/config.yml` with tunnel ID and credentials path
 
 ### 8. Start everything
 ```bash
-docker compose up -d
+docker compose --profile tunnel up -d
 docker compose logs -f immich-server
-# wait for "Immich Server is listening"
 ```
 
 ### 9. First login + theme
-- `https://cloud.ziperlab.com/photos` — create Immich admin
-- `https://cloud.ziperlab.com/music` — Navidrome auto-creates admin
-- `https://cloud.ziperlab.com/admin` — Glances dashboard (no login by default)
+- `https://photos.ziperlab.com` — create Immich admin
+- `https://music.ziperlab.com` — Navidrome auto-creates admin
+- `https://admin.ziperlab.com` — Glances dashboard (no login by default)
 - Immich admin → Settings → Custom Styling → paste `themes/immich-hud/custom.css`
 
 ### 10. Pin image tags
@@ -122,9 +122,9 @@ Once confirmed working, pin exact image tags in docker-compose.yml (not `latest`
 ## Verification checklist (post-deploy)
 
 - [ ] `docker compose ps` — all services `Up`
-- [ ] `https://cloud.ziperlab.com/photos` — Immich login loads over HTTPS
-- [ ] `https://cloud.ziperlab.com/music` — Navidrome login loads over HTTPS
-- [ ] `https://cloud.ziperlab.com/admin` — Glances dashboard loads
+- [ ] `https://photos.ziperlab.com` — Immich login loads over HTTPS
+- [ ] `https://music.ziperlab.com` — Navidrome login loads over HTTPS
+- [ ] `https://admin.ziperlab.com` — Glances dashboard loads
 - [ ] HUD theme applied on Immich
 - [ ] Second Immich user created, album sharing tested
 - [ ] Mobile app tested on phone (Immich official + Subsonic client for music)

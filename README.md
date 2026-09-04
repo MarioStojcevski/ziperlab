@@ -8,34 +8,50 @@ Your own private Google Photos and Spotify — but you own it. Everything runs o
 
 **For server monitoring:** [Glances](https://nicolargo.github.io/glances/) — a live dashboard showing CPU, RAM, disk space, network traffic, and everything Docker is running. So you know what's going on under the hood.
 
-Both are accessible at `cloud.ziperlab.com` — no VPN, no port forwarding, just a URL that works from anywhere.
-
 ## How it fits together
 
 ```
-        You (anywhere)
-            |
-            v
-   cloud.ziperlab.com  (Cloudflare handles HTTPS automatically)
-            |
-            v
-     cloudflared  (secure tunnel — no ports opened on your router)
-            |
-            v
-         Caddy  (traffic cop — routes by path)
-        / | \
-       v  v  v
-    Immich Navidrome Glances
-    /photos /music  /admin
+    Production (anywhere)              Local dev (localhost)
+    ─────────────────────              ─────────────────────
+         You                               You
+           |                                 |
+  photos.ziperlab.com              localhost:2283  (Immich)
+  music.ziperlab.com               localhost:4533  (Navidrome)
+  admin.ziperlab.com               localhost:61208 (Glances)
+           |                                 |
+      cloudflared                           |
+           |                                 |
+        Caddy (subdomains)                  |
+           |                                 |
+    Immich  Navidrome  Glances               -
 ```
 
 The whole thing runs in Docker. One command to start, one command to stop.
 
-## What you need to get started
+## Quick start — local dev
+
+Works on Windows, Mac, or Linux. Install Docker, copy `.env.example` to `.env`, set paths for your OS, then:
+
+```bash
+docker compose up -d
+```
+
+Open in your browser:
+
+| Service | URL |
+|---------|-----|
+| Photos | http://localhost:2283 |
+| Music | http://localhost:4533 |
+| Dashboard | http://localhost:61208 |
+
+Cloudflared is skipped by default. See [docs/SETUP.md](docs/SETUP.md) for the full walkthrough.
+
+## What you need for production
 
 - A Linux server (even a modest one works)
 - Docker installed
 - A Cloudflare account (free tier is fine) with `ziperlab.com` pointing to it
+- DNS records: `photos`, `music`, `admin` A records pointing to your server
 - Your music files dumped into a folder
 
 The full setup steps are in [docs/SETUP.md](docs/SETUP.md) — it walks through everything from cloning the repo to seeing your photos in the browser.
@@ -55,7 +71,6 @@ Navidrome ships with its default UI for now. Theming it properly means forking t
 | Adding users and sharing photos/music | [docs/USERS_AND_SHARING.md](docs/USERS_AND_SHARING.md) |
 | Phone app setup | [docs/MOBILE_APPS.md](docs/MOBILE_APPS.md) |
 | Backups — because this is self-hosted now | [docs/BACKUP.md](docs/BACKUP.md) |
-| Server dashboard (CPU, RAM, disk, traffic) | `https://cloud.ziperlab.com/admin` |
 
 ## One thing to know about music sharing
 

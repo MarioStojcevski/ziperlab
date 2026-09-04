@@ -2,7 +2,67 @@
 
 Full installation walkthrough for the ZiperLab Media Stack.
 
-## Prerequisites
+## Quick start — local dev (any OS)
+
+Test the stack on your local machine before deploying to a server.
+
+**1. Install Docker Desktop** (Windows/Mac) or Docker Engine (Linux).
+
+**2. Create your env file:**
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set the paths for your OS. Examples:
+
+| OS | `IMMICH_UPLOAD_LOCATION` |
+|----|--------------------------|
+| Linux | `/srv/ziperlab/immich/library` |
+| Windows | `C:/Users/<you>/data/ziperlab/immich/library` |
+| Mac | `/Users/<you>/data/ziperlab/immich/library` |
+
+Do the same for `IMMICH_DB_DATA_LOCATION`, `NAVIDROME_DATA`, and `NAVIDROME_MUSIC`.
+
+Set `DB_PASSWORD` to any random string for local dev:
+
+```bash
+# Linux/Mac
+openssl rand -hex 24
+
+# Windows (PowerShell)
+-join ((1..24) | ForEach-Object { '{0:x2}' -f (Get-Random -Max 256) })
+```
+
+**3. Start everything (without cloudflared):**
+
+```bash
+docker compose up -d
+```
+
+Cloudflared is skipped by default. Enable it later with `--profile tunnel` when you're ready for internet access.
+
+**4. Open in your browser:**
+
+| Service | URL |
+|---------|-----|
+| Photos (Immich) | http://localhost:2283 |
+| Music (Navidrome) | http://localhost:4533 |
+| Dashboard (Glances) | http://localhost:61208 |
+
+**5. Stop the stack:**
+
+```bash
+docker compose down
+```
+
+Data persists in the paths you configured until you delete them.
+
+---
+
+## Production deployment (Linux server)
+
+### Prerequisites
 
 1. SSH access to the Linux server (Ubuntu/Debian), sudo rights
 2. Docker + Docker Compose v2 installed (`docker compose version`)
@@ -52,7 +112,7 @@ See [CLOUDFLARE.md](CLOUDFLARE.md) for the full tunnel setup. You need this conf
 ## Step 6 — Start the stack
 
 ```bash
-docker compose up -d
+docker compose --profile tunnel up -d
 docker compose logs -f immich-server
 ```
 
@@ -60,9 +120,9 @@ Wait for `Immich Server is listening` in the logs, then `Ctrl+C`.
 
 ## Step 7 — First login
 
-- **Photos:** visit `https://cloud.ziperlab.com/photos` — create the first admin account
-- **Music:** visit `https://cloud.ziperlab.com/music` — Navidrome auto-creates its first admin on first visit
-- **Server dashboard:** visit `https://cloud.ziperlab.com/admin` — Glances shows live CPU, RAM, disk, network, and Docker stats
+- **Photos:** visit `https://photos.ziperlab.com` — create the first admin account
+- **Music:** visit `https://music.ziperlab.com` — Navidrome auto-creates its first admin on first visit
+- **Server dashboard:** visit `https://admin.ziperlab.com` — Glances shows live CPU, RAM, disk, network, and Docker stats
 
 ## Step 8 — Apply HUD theme
 
@@ -71,9 +131,9 @@ In Immich: **Administration > Settings > Custom Styling** — paste the full con
 ## Verify
 
 - [ ] `docker compose ps` shows all services `Up`/healthy
-- [ ] `https://cloud.ziperlab.com/photos` loads Immich login over HTTPS
-- [ ] `https://cloud.ziperlab.com/music` loads Navidrome login over HTTPS
-- [ ] `https://cloud.ziperlab.com/admin` loads Glances server dashboard
+- [ ] `https://photos.ziperlab.com` loads Immich login over HTTPS
+- [ ] `https://music.ziperlab.com` loads Navidrome login over HTTPS
+- [ ] `https://admin.ziperlab.com` loads Glances server dashboard
 - [ ] HUD theme visibly applied on Immich
 - [ ] A second user can be created and tested on Immich
 
